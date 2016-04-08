@@ -100,3 +100,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# weixin config
+WEIXIN_TOKEN = 'Your weixin token'
+WEIXIN_APP_ID = 'Your weixin app id'
+WEIXIN_APP_SECRET = 'Your weixin app secret'
+WEIXIN_ENCODING_AES_KEY = 'Your weixin encoding aes key'
