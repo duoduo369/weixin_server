@@ -1,0 +1,2 @@
+Django==1.8.8
+wechat-sdk==0.6.1
