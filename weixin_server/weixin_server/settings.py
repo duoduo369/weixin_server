@@ -42,7 +42,7 @@ INSTALLED_APPS = (
 MIDDLEWARE_CLASSES = (
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -106,3 +106,53 @@ WEIXIN_TOKEN = 'Your weixin token'
 WEIXIN_APP_ID = 'Your weixin app id'
 WEIXIN_APP_SECRET = 'Your weixin app secret'
 WEIXIN_ENCODING_AES_KEY = 'Your weixin encoding aes key'
+WEIXIN_ENCRYPT_MODE = 'safe' # safe | compatible | normal
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': #'%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+            '%(asctime)s %(levelname)s %(thread)d %(process)d [%(name)s] %(pathname)s:%(funcName)s %(lineno)d - %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+        'tracking': {
+            'format': '%(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        }
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        '': {
+            'handlers': ['console'],
+            'propagate': False
+        },
+    }
+}
+
+try:
+    from .local_settings import *
+except:
+    pass
