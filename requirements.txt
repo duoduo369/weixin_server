@@ -1,3 +1,7 @@
 Django==1.8.8
 wechat-sdk==0.6.1
 ipython==4.1.2
+django-extensions==1.6.1
+pylint==1.5.2
+pylint-django==0.7.1
+pylint-plugin-utils==0.2.3
