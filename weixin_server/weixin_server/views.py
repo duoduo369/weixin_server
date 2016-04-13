@@ -31,5 +31,12 @@ class IndexView(View, WeixinDispatchMixin):
         return HttpResponse(response_xml, content_type='application/xml')
 
     def weixin_handler_event(self, request, parsed_wechat, *args, **kwargs):
-        response_xml = parsed_wechat.response_text(content=u'感谢您的关注，这是学堂在线的测试账号')
+        response_xml = parsed_wechat.response_text(
+            content=u'event事件: {}'.format(
+                parsed_wechat.message.type))
+        return HttpResponse(response_xml, content_type='application/xml')
+
+    def weixin_handler_event_subscribe(self, request, parsed_wechat, *args, **kwargs):
+        response_xml = parsed_wechat.response_text(
+                content=u'感谢您的关注，这是学堂在线的测试账号')
         return HttpResponse(response_xml, content_type='application/xml')

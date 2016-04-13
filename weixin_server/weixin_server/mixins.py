@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from weixin.utils import wechat
-from wechat_sdk.messages import MESSAGE_TYPES
+from wechat_sdk.messages import MESSAGE_TYPES, EventMessage
 
 REVERSED_MESSAGE_TYPES = {value:key for key, value in MESSAGE_TYPES.iteritems()}
 
@@ -26,4 +26,10 @@ class WeixinDispatchMixin(object):
 
     def get_weixin_handler_name(self, request, parsed_wechat, *args, **kwargs):
         message = parsed_wechat.message
+        if isinstance(message, EventMessage):
+            event_name = REVERSED_MESSAGE_TYPES[type(message)]
+            event_detail_name = 'weixin_handler_{}_{}'.format(event_name, message.type)
+            if hasattr(self, event_detail_name):
+                event_name = event_detail_name
+                return event_name
         return u'weixin_handler_{}'.format(REVERSED_MESSAGE_TYPES.get(type(message), 'unsupport'))

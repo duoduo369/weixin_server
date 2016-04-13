@@ -30,8 +30,6 @@ class Menu(ConfigurationModel):
             elif action_type == 'delete':
                 weixin_request_type = 'delete_menu'
                 response = wechat.delete_menu()
-                print 'delete_menu'
-                print response
         except OfficialAPIError as ex:
             response = {
                 'errcode': ex.errcode,
