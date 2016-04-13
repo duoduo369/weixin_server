@@ -9,6 +9,7 @@ from wechat_sdk.exceptions import OfficialAPIError
 from config_models.admin import ConfigurationModelAdmin
 from weixin.utils import wechat
 
+
 class MenuAdmin(ConfigurationModelAdmin):
 
     readonly_fields = ('response',)
@@ -26,18 +27,39 @@ class MenuAdmin(ConfigurationModelAdmin):
             )
         }
 
+    def save_model(self, request, obj, form, change):
+        obj.changed_by = request.user
+        obj.save(action_type='create')
+
+    def revert(self, request, queryset):
+        """
+        Admin action to revert a configuration back to the selected value
+        """
+        if queryset.count() != 1:
+            self.message_user(request, _("Please select a single configuration to revert to."))
+            return
+        target = queryset[0]
+        target.id = None
+        target.changed_by = request.user
+        target.save(action_type='create')
+        self.message_user(request, _("Reverted configuration."))
+        return HttpResponseRedirect(
+            reverse(
+                'admin:{}_{}_change'.format(
+                    self.model._meta.app_label,
+                    self.model._meta.model_name,
+                ),
+                args=(target.id,),
+            )
+        )
+
     def delete_weixin_menu(self, request, queryset):
-        try:
-            response = wechat.delete_menu()
-        except OfficialAPIError as ex:
-            response = json.dumps({"errcode": ex.errcode ,"errmsg":ex.errmsg})
-            # 如果weixin api调用失败，则此条记录不能激活
         menu = self.model()
-        menu.response = response
+        menu.changed_by = request.user
         menu.data = '{}'
         menu.enabled = False
-        menu.save()
-
+        menu.save(action_type='delete')
+        self.message_user(request, _("Delete Weixin Menu."))
         return HttpResponseRedirect(reverse('admin:{}_{}_changelist'.format(
             self.model._meta.app_label, self.model._meta.model_name,)))
 
