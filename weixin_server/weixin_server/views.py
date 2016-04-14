@@ -2,11 +2,13 @@
 import logging
 from django.views.generic import View
 from django.http.response import HttpResponse
-from weixin.utils import wechat
+from weixin.wechat import get_wechat
 from weixin.qrcode import create_temp_qrcode, create_permanent_qrcode
 from wechat_sdk.exceptions import ParseError
 from .mixins import WeixinDispatchMixin
 from django.core.cache import cache
+
+wechat = get_wechat()
 
 log = logging.getLogger(__name__)
 
@@ -64,7 +66,8 @@ class IndexView(View, WeixinDispatchMixin):
             if not qrcode_url:
                 qrcode_url = create_temp_qrcode(key)
                 cache.set(cache_key, qrcode_url, 60*60)
-            response_xml = parsed_wechat.response_text(content=u'<img src="{}"/>'.format(qrcode_url))
+            response_xml = parsed_wechat.response_text(
+                    content=u'<a href="{}">临时二维码</a>'.format(qrcode_url))
             return HttpResponse(response_xml, content_type='application/xml')
         elif message.key == 'CLICK_PERMANENT_QRCODE_01':
             key = 'permanent_1'
@@ -73,7 +76,8 @@ class IndexView(View, WeixinDispatchMixin):
             if not qrcode_url:
                 qrcode_url = create_permanent_qrcode(key)
                 cache.set(cache_key, qrcode_url, 60*60)
-            response_xml = parsed_wechat.response_text(content=u'<img src="{}"/>'.format(qrcode_url))
+            response_xml = parsed_wechat.response_text(
+                    content=u'<a href="{}">永久二维码</a>'.format(qrcode_url))
             return HttpResponse(response_xml, content_type='application/xml')
 
         return self.weixin_handler_event(

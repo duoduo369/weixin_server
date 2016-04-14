@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
-from weixin.utils import wechat
+from weixin.wechat import get_wechat
 from wechat_sdk.messages import MESSAGE_TYPES, EventMessage
+
+wechat = get_wechat()
 
 REVERSED_MESSAGE_TYPES = {value:key for key, value in MESSAGE_TYPES.iteritems()}
 

@@ -5,3 +5,4 @@ django-extensions==1.6.1
 pylint==1.5.2
 pylint-django==0.7.1
 pylint-plugin-utils==0.2.3
+python-memcached==1.57

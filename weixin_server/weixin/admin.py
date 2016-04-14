@@ -7,7 +7,9 @@ from django.http import HttpResponseRedirect
 from weixin.models import Menu
 from wechat_sdk.exceptions import OfficialAPIError
 from config_models.admin import ConfigurationModelAdmin
-from weixin.utils import wechat
+from weixin.wechat import get_wechat
+
+wechat = get_wechat()
 
 
 class MenuAdmin(ConfigurationModelAdmin):

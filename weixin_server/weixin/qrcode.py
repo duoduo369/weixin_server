@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 '''微信二维码'''
-from .utils import wechat
+from .wechat import get_wechat
 from django.conf import settings
+
+wechat = get_wechat()
 
 def create_temp_qrcode_ticket(scene_id, expire_seconds=604800):
     data = {

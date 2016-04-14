@@ -6,7 +6,9 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from wechat_sdk.exceptions import OfficialAPIError
 from config_models.models import ConfigurationModel
-from weixin.utils import wechat
+from weixin.wechat import get_wechat
+
+wechat = get_wechat()
 
 class Menu(ConfigurationModel):
     cache_timeout = 10

@@ -111,6 +111,12 @@ WEIXIN_APP_SECRET = 'Your weixin app secret'
 WEIXIN_ENCODING_AES_KEY = 'Your weixin encoding aes key'
 WEIXIN_ENCRYPT_MODE = 'safe' # safe | compatible | normal
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
+        'LOCATION': '127.0.0.1:11211',
+    }
+}
 
 LOGGING = {
     'version': 1,
