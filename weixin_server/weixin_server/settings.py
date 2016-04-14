@@ -111,6 +111,7 @@ WEIXIN_APP_SECRET = 'Your weixin app secret'
 WEIXIN_ENCODING_AES_KEY = 'Your weixin encoding aes key'
 WEIXIN_ENCRYPT_MODE = 'safe' # safe | compatible | normal
 
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
