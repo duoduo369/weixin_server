@@ -78,3 +78,9 @@ class IndexView(View, WeixinDispatchMixin):
 
         return self.weixin_handler_event(
                 request, parsed_wechat, *args, **kwargs)
+
+    def weixin_handler_event_scan(self, request, parsed_wechat, *args, **kwargs):
+        key = parsed_wechat.message.key # 对应生成二维码的key
+        ticket = parsed_wechat.message.ticket
+        return self.weixin_handler_event(
+                request, parsed_wechat, *args, **kwargs)
