@@ -16,10 +16,9 @@
     source 你的virtualenv
     pip install -r requirements.txt
 
-如果用mysql的话数据库新建一个你settings中的数据库,由于django 1.8.8的bug，需要先跑auth的migrate.
+如果用mysql的话数据库新建一个你settings中的数据库
 
-  python manage.py migrate auth
-  python manage.py migrate
+    python manage.py migrate
 
 配置
 ---
@@ -77,3 +76,5 @@ ngrok的配置以`/etc/ngrok/ngrok -config=/etc/ngrok/ngrok.conf -subdomain=your
 非event类型直接在IndexView里面添加weixin_handler_xxx方法, xxx支持的类型为[sdk message](https://github.com/wechat-python-sdk/wechat-python-sdk/blob/master/wechat_sdk%2Fmessages.py)里面的MESSAGE_TYPES的value, 即:text|image|video|shortvideo|location|link|event这些类型，而如果是event，则可以细化为weixin_handler_event_xxx方法,这里的xxx可以直接看[sdk文档的这个部分](http://wechat-python-sdk.com/official/message/#_1)
 
 注意扫码的scan事件，用户未关注和关注的时候是不一样的，未关注时会先关注，此时应该在weixin_handler_event_subscribe以及weixin_handler_event_scan都做处理，而且两个方法取到的wechat.message.key是不同的，未关注时处理方法为weixin_handler_event_subscribe,key会加一个前缀`qrscene_`, 这点需要注意
+
+如果你想用这个weixin_server项目接入三方登录，可以参考**[feature/myauth](https://github.com/duoduo369/weixin_server/tree/feature/myauth)**分支，三方用的python-social-auth,里面的weixin backend都是我写的, app的刚提pr不知道作者什么时候合并，如果要用先-e安装我的分之的这个版本[我的python-social-auth](https://github.com/duoduo369/python-social-auth/tree/master_origin)
