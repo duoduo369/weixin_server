@@ -6,3 +6,5 @@ pylint==1.5.2
 pylint-django==0.7.1
 pylint-plugin-utils==0.2.3
 python-memcached==1.57
+python-social-auth==0.2.16
+MySQL-python==1.2.5

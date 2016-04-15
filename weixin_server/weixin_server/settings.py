@@ -38,8 +38,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'social.apps.django_app.default',
+
     'config_models',
     'weixin',
+    'myauth',
 )
 
 MIDDLEWARE_CLASSES = (

@@ -16,6 +16,11 @@
     source 你的virtualenv
     pip install -r requirements.txt
 
+如果用mysql的话数据库新建一个你settings中的数据库,由于django 1.8.8的bug，需要先跑auth的migrate.
+
+  python manage.py migrate auth
+  python manage.py migrate
+
 配置
 ---
 ####ngrok配置
