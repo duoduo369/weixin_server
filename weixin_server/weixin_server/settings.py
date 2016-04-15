@@ -54,7 +54,41 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    #'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
+
+AUTHENTICATION_BACKENDS = (
+    #'social_auth.backends.contrib.weixin.WeixinBackend',
+    'social.backends.weixin.WeixinOAuth2APP',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
+    'myauth.pipeline.user.save_profile',
+)
+
+SOCIAL_AUTH_LOGIN_URL = '/login-url/'
+SOCIAL_AUTH_LOGIN_ERROR_URL = '/login-error'
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/logged-in/'
+SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/new-users-redirect-url/'
+SOCIAL_AUTH_NEW_ASSOCIATION_REDIRECT_URL = '/oauth/newassociation/'
+SOCIAL_AUTH_INACTIVE_USER_URL = '/inactive-user-login/'
+SOCIAL_AUTH_BACKEND_ERROR_URL = '/new-error-url/'
+SOCIAL_AUTH_AUTHENTICATION_SUCCESS_URL = '/oauth/authentication/success/'
+
+SOCIAL_AUTH_INACTIVE_USER_LOGIN = True
+SOCIAL_AUTH_WEIXINAPP_KEY = 'weixin app id'
+SOCIAL_AUTH_WEIXINAPP_SECRET = 'weixin app secret'
+SOCIAL_AUTH_WEIXINAPP_SCOPE = ['snsapi_userinfo',]
 
 ROOT_URLCONF = 'weixin_server.urls'
 
@@ -69,6 +103,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social.apps.django_app.context_processors.backends',
+                'social.apps.django_app.context_processors.login_redirect',
             ],
         },
     },
