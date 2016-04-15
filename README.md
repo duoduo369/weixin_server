@@ -78,3 +78,10 @@ ngrok的配置以`/etc/ngrok/ngrok -config=/etc/ngrok/ngrok.conf -subdomain=your
 注意扫码的scan事件，用户未关注和关注的时候是不一样的，未关注时会先关注，此时应该在weixin_handler_event_subscribe以及weixin_handler_event_scan都做处理，而且两个方法取到的wechat.message.key是不同的，未关注时处理方法为weixin_handler_event_subscribe,key会加一个前缀`qrscene_`, 这点需要注意
 
 如果你想用这个weixin_server项目接入三方登录，可以参考**[feature/myauth](https://github.com/duoduo369/weixin_server/tree/feature/myauth)**分支，三方用的python-social-auth,里面的weixin backend都是我写的, app的刚提pr不知道作者什么时候合并，如果要用先-e安装我的分之的这个版本[我的python-social-auth](https://github.com/duoduo369/python-social-auth/tree/master_origin)
+
+项目的一些讲解
+---
+
+[微信公众号开发小记——1.接入微信服务器](https://segmentfault.com/a/1190000004897252)
+
+[微信公众号开发小记——2.80端口上的服务](https://segmentfault.com/a/1190000004947220)
