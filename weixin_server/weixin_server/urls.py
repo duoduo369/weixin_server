@@ -18,6 +18,7 @@ from weixin_server.views import IndexView
 
 urlpatterns = [
     url(r'^admin/', include(admin.site.urls)),
-    url('', include('social.apps.django_app.urls', namespace='social')),
     url(r'^$', IndexView.as_view(), name='index'),
+    url('', include('social.apps.django_app.urls', namespace='social')),
+    url('', include('myauth.urls', namespace='myauth')),
 ]

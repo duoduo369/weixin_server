@@ -8,3 +8,4 @@ pylint-plugin-utils==0.2.3
 python-memcached==1.57
 python-social-auth==0.2.16
 MySQL-python==1.2.5
+git+https://github.com/duoduo369/django-mako.git

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for weixin_server project.
 
@@ -12,8 +13,10 @@ https://docs.djangoproject.com/en/1.8/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from path import path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = path(BASE_DIR)
 
 
 # Quick-start development settings - unsuitable for production
@@ -39,6 +42,8 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'social.apps.django_app.default',
+    'mako',
+    'djangomako',
 
     'config_models',
     'weixin',
@@ -54,6 +59,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'djangomako.middleware.MakoMiddleware',
     #'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 
@@ -66,24 +72,26 @@ AUTHENTICATION_BACKENDS = (
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
-    'social.pipeline.social_auth.auth_allowed',
-    'social.pipeline.social_auth.social_user',
+    # 判断当前三方账号是否已经绑定在其他账户上
+    # 判断当前账户是否绑定了多个同一平台的账号
+    'myauth.pipeline.social_auth.social_user',
     'social.pipeline.user.get_username',
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
-    'social.pipeline.social_auth.load_extra_data',
-    'social.pipeline.user.user_details',
     'myauth.pipeline.user.save_profile',
+    #'social.pipeline.social_auth.load_extra_data',
+    #'social.pipeline.user.user_details',
 )
-
+LOGIN_URL = '/login/weixinapp/'
 SOCIAL_AUTH_LOGIN_URL = '/login-url/'
 SOCIAL_AUTH_LOGIN_ERROR_URL = '/login-error'
-SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/logged-in/'
-SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/new-users-redirect-url/'
-SOCIAL_AUTH_NEW_ASSOCIATION_REDIRECT_URL = '/oauth/newassociation/'
-SOCIAL_AUTH_INACTIVE_USER_URL = '/inactive-user-login/'
-SOCIAL_AUTH_BACKEND_ERROR_URL = '/new-error-url/'
-SOCIAL_AUTH_AUTHENTICATION_SUCCESS_URL = '/oauth/authentication/success/'
+# 已经绑定未登录用户登录
+SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/oauth/authentication/success/'
+# 未绑定新用户登录
+SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/oauth/authentication/success/'
+# 已登录 未绑定或者绑定用户到这里, 如果只针对微信用户而且没有绑定的功能,
+# 那么用户是不太关心绑定的view的
+SOCIAL_AUTH_NEW_ASSOCIATION_REDIRECT_URL = '/oauth/authentication/success/'
 
 SOCIAL_AUTH_INACTIVE_USER_LOGIN = True
 SOCIAL_AUTH_WEIXINAPP_KEY = 'weixin app id'
@@ -95,7 +103,9 @@ ROOT_URLCONF = 'weixin_server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            PROJECT_ROOT / 'templates',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,6 +119,8 @@ TEMPLATES = [
         },
     },
 ]
+
+MAKO_TEMPLATE_DIRS = TEMPLATES[0]['DIRS']
 
 WSGI_APPLICATION = 'weixin_server.wsgi.application'
 
