@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from myauth.models import UserProfile
+from myauth.models import UserProfile, UserInvite
+from utils.https import parse_url
 
 USER_FIELDS = ['username', 'email']
 
@@ -26,3 +27,13 @@ def save_profile(backend, user, response, *args, **kwargs):
     if need_save:
         profile.save()
     return {'profile': profile}
+
+
+def invite_user(backend, user, response, *args, **kwargs):
+    is_new = kwargs['is_new']
+    next_url = backend.strategy.session_get('next')
+    params = parse_url(next_url)['params']
+    inviter_id = params.get('inviter_id')
+    if inviter_id and is_new and user:
+        UserInvite.invite_user(inviter_id, user, only_allow_invited_by_one_user=True)
+    return {'inviter_id': inviter_id}

@@ -79,6 +79,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.user.create_user',
     'social.pipeline.social_auth.associate_user',
     'myauth.pipeline.user.save_profile',
+    'myauth.pipeline.user.invite_user',
     #'social.pipeline.social_auth.load_extra_data',
     #'social.pipeline.user.user_details',
 )
@@ -93,10 +94,13 @@ SOCIAL_AUTH_NEW_USER_REDIRECT_URL = '/oauth/authentication/success/'
 # 那么用户是不太关心绑定的view的
 SOCIAL_AUTH_NEW_ASSOCIATION_REDIRECT_URL = '/oauth/authentication/success/'
 
+SOCIAL_AUTH_FIELDS_STORED_IN_SESSION = ['inviter_id', 'next']
+
 SOCIAL_AUTH_INACTIVE_USER_LOGIN = True
 SOCIAL_AUTH_WEIXINAPP_KEY = 'weixin app id'
 SOCIAL_AUTH_WEIXINAPP_SECRET = 'weixin app secret'
 SOCIAL_AUTH_WEIXINAPP_SCOPE = ['snsapi_userinfo',]
+SOCIAL_AUTH_WEIXINAPP_FIELDS_STORED_IN_SESSION = ['inviter_id', 'next']
 
 ROOT_URLCONF = 'weixin_server.urls'
 
@@ -154,6 +158,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+SITE_NAME = 'local.test.com'
 
 # weixin config
 WEIXIN_TOKEN = 'Your weixin token'
