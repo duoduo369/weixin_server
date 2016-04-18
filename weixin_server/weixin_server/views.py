@@ -7,12 +7,19 @@ from weixin.qrcode import create_temp_qrcode, create_permanent_qrcode
 from wechat_sdk.exceptions import ParseError
 from .mixins import WeixinDispatchMixin
 from django.core.cache import cache
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+
 
 wechat = get_wechat()
 
 log = logging.getLogger(__name__)
 
 class IndexView(View, WeixinDispatchMixin):
+
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super(IndexView, self).dispatch(request, *args, **kwargs)
 
     def get(self, request):
         signature = request.GET.get('signature', '')
