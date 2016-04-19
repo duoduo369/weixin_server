@@ -143,9 +143,9 @@ DATABASES = {
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Asia/Chongqing'  # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
+LANGUAGE_CODE = 'zh-hans'  # http://www.i18nguy.com/unicode/language-identifiers.html
 
-TIME_ZONE = 'UTC'
 
 USE_I18N = True
 

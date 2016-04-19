@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db.models.signals import post_save
 from django_extensions.db.models import TimeStampedModel
 from django.core.urlresolvers import reverse
+from weixin.models import QRCode
 
 class UserProfile(TimeStampedModel):
 
@@ -13,6 +14,7 @@ class UserProfile(TimeStampedModel):
     avatar = models.URLField(blank=True, max_length=255, default='')
     weixin_unionid = models.CharField(
             max_length=255, db_index=True, default='')
+    inviter_qrcode = models.ForeignKey(QRCode, null=True)
 
     @classmethod
     def create_default_profile(cls, user):
@@ -30,6 +32,18 @@ class UserProfile(TimeStampedModel):
     def invite_url(self):
         return 'http://{}{}?inviter_id={}'.format(
                 settings.SITE_NAME, reverse('myauth:invite-user'), self.user.id)
+
+    @property
+    def invite_qrcode_url(self):
+        if not self.id:
+            raise Exception(u'Must persistence in db')
+        if not self.inviter_qrcode:
+            scene_id = QRCode.generate_temp_scene_id(self.id)
+            self.inviter_qrcode = QRCode.get_qrcode(QRCode.QR_SCENE, scene_id)
+            self.save()
+            return self.inviter_qrcode.url
+        else:
+            return self.inviter_qrcode.qrcode_url
 
     def __unicode__(self):
         return self.name
