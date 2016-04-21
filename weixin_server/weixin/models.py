@@ -2,6 +2,7 @@
 import json
 import logging
 
+from random import randint
 from uuid import uuid4
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -61,13 +62,15 @@ class QRCode(models.Model):
         (QR_LIMIT_STR_SCENE, QR_LIMIT_STR_SCENE),
     )
     url = models.URLField(blank=True, max_length=255, default='')
+    # QR_SCENE时上限为2**32
     scene_id = models.CharField(blank=True, max_length=255, db_index=True, default='')
     update_time = models.DateTimeField(blank=True, null=True)
     action_name = models.CharField(max_length=30,
             choices=ACTION_NAME_CHOICES, default=QR_SCENE, db_index=True)
+    action_type = models.CharField(max_length=255, default='', db_index=True)
 
     @classmethod
-    def get_qrcode(cls, action_name, scene_id):
+    def get_qrcode(cls, action_name, scene_id, action_type=None):
         now = timezone.now()
         qrcode = None
         try:
@@ -83,7 +86,10 @@ class QRCode(models.Model):
         except cls.DoesNotExist:
             pass
         if not qrcode:
-            qrcode = cls(action_name=action_name, scene_id=scene_id)
+            qrcode = cls(
+                    action_name=action_name,
+                    scene_id=scene_id,
+                    action_type=action_type)
         qrcode.update_time = now
         if action_name == cls.QR_SCENE:
             qrcode.url = create_temp_qrcode(scene_id)
@@ -94,7 +100,8 @@ class QRCode(models.Model):
 
     @classmethod
     def generate_temp_scene_id(cls, obj_id):
-        return int('{}{}'.format(obj_id, uuid4().int)[:20])
+        '''max id: 2 ** 32 = 4294967296'''
+        return int('{}{}{}'.format(randint(1, 3), obj_id, uuid4().int)[:9])
 
     @property
     def qrcode_url(self):

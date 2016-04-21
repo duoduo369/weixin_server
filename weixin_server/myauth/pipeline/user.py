@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from myauth.models import UserProfile, UserInvite
+from django.contrib.auth.models import User
 from utils.https import parse_url
 
 USER_FIELDS = ['username', 'email']
@@ -31,9 +32,28 @@ def save_profile(backend, user, response, *args, **kwargs):
 
 def invite_user(backend, user, response, *args, **kwargs):
     is_new = kwargs['is_new']
+    if not is_new or not user:
+        return
+    # 二维码扫描
+    qrcode = kwargs.get('qrcode')
+    if qrcode and qrcode.userprofile_set.all().exists():
+        inviter = qrcode.userprofile_set.all()[0].user
+        try:
+            UserInvite.invite_user(inviter.id, user, only_allow_invited_by_one_user=True)
+        except:
+            return
+        user._inviter = inviter
+        return {'inviter': inviter}
+    # 点击邀请链接
     next_url = backend.strategy.session_get('next')
-    params = parse_url(next_url)['params']
-    inviter_id = params.get('inviter_id')
-    if inviter_id and is_new and user:
-        UserInvite.invite_user(inviter_id, user, only_allow_invited_by_one_user=True)
-    return {'inviter_id': inviter_id}
+    if next_url:
+        params = parse_url(next_url)['params']
+        inviter_id = params.get('inviter_id')
+        if inviter_id and user:
+            try:
+                inviter = User.objects.get(id=inviter_id)
+                UserInvite.invite_user(inviter_id, user, only_allow_invited_by_one_user=True)
+            except:
+                return
+            user._inviter = inviter
+        return {'inviter': inviter}

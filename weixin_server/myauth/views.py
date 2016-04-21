@@ -30,6 +30,9 @@ class OauthAuthenticationSuccessView(View):
     '''三方登录成功'''
 
     def get(self, request):
+        next_url = request.GET.get('next')
+        if next_url:
+            return HttpResponseRedirect(next_url)
         return render_to_response('oauth/authentication_success.html', {})
 
 

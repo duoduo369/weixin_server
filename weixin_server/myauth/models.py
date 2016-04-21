@@ -39,7 +39,8 @@ class UserProfile(TimeStampedModel):
             raise Exception(u'Must persistence in db')
         if not self.inviter_qrcode:
             scene_id = QRCode.generate_temp_scene_id(self.id)
-            self.inviter_qrcode = QRCode.get_qrcode(QRCode.QR_SCENE, scene_id)
+            self.inviter_qrcode = QRCode.get_qrcode(
+                    QRCode.QR_SCENE, scene_id, action_type='invite_user')
             self.save()
             return self.inviter_qrcode.url
         else:

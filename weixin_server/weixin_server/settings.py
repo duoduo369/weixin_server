@@ -80,8 +80,8 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.associate_user',
     'myauth.pipeline.user.save_profile',
     'myauth.pipeline.user.invite_user',
-    #'social.pipeline.social_auth.load_extra_data',
-    #'social.pipeline.user.user_details',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
 )
 LOGIN_URL = '/login/weixinapp/'
 SOCIAL_AUTH_LOGIN_URL = '/login-url/'

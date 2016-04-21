@@ -4,11 +4,16 @@ from django.views.generic import View
 from django.http.response import HttpResponse
 from weixin.wechat import get_wechat
 from weixin.qrcode import create_temp_qrcode, create_permanent_qrcode
+from weixin.models import QRCode
 from wechat_sdk.exceptions import ParseError
 from .mixins import WeixinDispatchMixin
 from django.core.cache import cache
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
+from social.apps.django_app.views import complete
+from social.backends.weixin import WeixinOAuth2APP
+from social.strategies.utils import get_current_strategy
+from social.apps.django_app.utils import load_strategy
 
 
 wechat = get_wechat()
@@ -48,6 +53,13 @@ class IndexView(View, WeixinDispatchMixin):
         return HttpResponse(response_xml, content_type='application/xml')
 
     def weixin_handler_event_subscribe(self, request, parsed_wechat, *args, **kwargs):
+        key = parsed_wechat.message.key # 对应生成二维码的key
+        ticket = parsed_wechat.message.ticket
+        if ticket:
+            scene_id = key.split('qrscene_')[-1]
+            response = self.handle_invite_scan(request, parsed_wechat, scene_id)
+            if response:
+                return response
         response_xml = parsed_wechat.response_text(
                 content=u'感谢您的关注，这是学堂在线的测试账号')
         return HttpResponse(response_xml, content_type='application/xml')
@@ -93,5 +105,36 @@ class IndexView(View, WeixinDispatchMixin):
     def weixin_handler_event_scan(self, request, parsed_wechat, *args, **kwargs):
         key = parsed_wechat.message.key # 对应生成二维码的key
         ticket = parsed_wechat.message.ticket
+        if ticket:
+            response = self.handle_invite_scan(request, parsed_wechat, key)
+            if response:
+                return response
         return self.weixin_handler_event(
                 request, parsed_wechat, *args, **kwargs)
+
+    def handle_invite_scan(self, request, parsed_wechat, scene_id):
+        try:
+            qrcode = QRCode.objects.get(scene_id=scene_id, action_type='invite_user')
+        except QRCode.DoesNotExist:
+            return
+        openid = parsed_wechat.message.source
+        user_info = parsed_wechat.get_user_info(openid)
+        strategy = load_strategy(request)
+        backend = WeixinOAuth2APP()
+        backend.strategy = strategy
+        idx, backend, xargs, xkwargs = strategy.partial_from_session(
+            {
+                'next':0,
+                'backend': backend,
+                'args':[],
+                'kwargs':{'qrcode': qrcode},
+            }
+        )
+        xkwargs.update({'response': user_info})
+        user = backend.continue_pipeline(pipeline_index=idx, *xargs, **xkwargs)
+        if not user:
+            return
+        if user.is_new and hasattr(user, '_inviter'):
+            content = u'感谢您的加入，邀请者是 {}'.format(user._inviter.username)
+            response_xml = parsed_wechat.response_text(content=content)
+            return HttpResponse(response_xml, content_type='application/xml')
