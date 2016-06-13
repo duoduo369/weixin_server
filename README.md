@@ -85,3 +85,7 @@ ngrok的配置以`/etc/ngrok/ngrok -config=/etc/ngrok/ngrok.conf -subdomain=your
 [微信公众号开发小记——1.接入微信服务器](https://segmentfault.com/a/1190000004897252)
 
 [微信公众号开发小记——2.80端口上的服务](https://segmentfault.com/a/1190000004947220)
+
+[微信公众号开发小记——3.接入三方登录](https://segmentfault.com/a/1190000004947540)
+
+[微信公众号开发小记——4.两种邀请用户的方式 扫码&&链接](https://segmentfault.com/a/1190000004980643)
