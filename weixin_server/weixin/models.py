@@ -5,12 +5,17 @@ import logging
 from random import randint
 from uuid import uuid4
 from django.db import models
+from django.conf import settings
+from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.utils import timezone
+from django_extensions.db.models import TimeStampedModel
 from wechat_sdk.exceptions import OfficialAPIError
 from config_models.models import ConfigurationModel
 from weixin.wechat import get_wechat
 from weixin.qrcode import create_temp_qrcode, create_permanent_qrcode
+from weixin.utils import create_mch_billno, xml_response_to_dict
+from weixin.pay import sendredpack
 
 wechat = get_wechat()
 
@@ -124,3 +129,140 @@ class QRCode(models.Model):
         self.url = create_temp_qrcode(self.scene_id)
         self.save()
         return self.url
+
+
+class RedPackTemplate(TimeStampedModel):
+    '''
+    红包模板，admin配置用
+    '''
+    GROUPREDPACK = 'groupredpack'
+    REDPACK = 'redpack'
+    type_choices = (
+        (GROUPREDPACK, 'groupredpack'),
+        (REDPACK, 'redpack'),
+    )
+    # 活动, 基本用来后期查一个活动发了多少红包的数据需求
+    event = models.CharField(max_length=60, unique=True, db_index=True)
+    send_name = models.CharField(max_length=60)
+    wishing = models.CharField(max_length=255)
+    act_name = models.CharField(max_length=60)
+    remark = models.CharField(max_length=255)
+
+
+class RedPackRecord(TimeStampedModel):
+    '''
+    请求微信红包接口的记录表
+    https://pay.weixin.qq.com/wiki/doc/api/tools/cash_coupon.php?chapter=13_5
+    '''
+    GROUPREDPACK = 'groupredpack'
+    REDPACK = 'redpack'
+    type_choices = (
+        (GROUPREDPACK, 'groupredpack'),
+        (REDPACK, 'redpack'),
+    )
+    user = models.ForeignKey(User)
+    type = models.CharField(choices=type_choices, max_length=60)
+    # 活动, 基本用来后期查一个活动发了多少红包的数据需求
+    event = models.CharField(max_length=60, db_index=True, default='')
+    # 反查id，可以根据这个值反查活动，需要自己定义具体活动id
+    reverse_key = models.CharField(max_length=255, db_index=True, default='')
+    mch_billno = models.CharField(max_length=60, db_index=True, unique=True)
+    mch_id = models.CharField(max_length=60)
+    wxappid = models.CharField(max_length=60)
+    send_name = models.CharField(max_length=60)
+    re_openid = models.CharField(max_length=60, db_index=True)
+    total_amount = models.CharField(max_length=60)
+    total_num = models.CharField(max_length=60)
+    wishing = models.CharField(max_length=255)
+    client_ip = models.CharField(max_length=60, default='127.0.0.1')
+    act_name = models.CharField(max_length=60)
+    remark = models.CharField(max_length=255)
+    amt_type = models.CharField(max_length=255, default='')
+    status = models.CharField(max_length=255, default='', db_index=True)
+    response = models.TextField(default='')
+    send_time = models.CharField(max_length=255, default='')
+    send_listid = models.CharField(max_length=255, default='')
+
+    @classmethod
+    def create_record_from_template(cls, user, re_openid,
+            total_amount, total_num, redpack_template,
+            type='redpack', reverse_key='', amt_type='',
+            client_ip='127.0.0.1'):
+        attrs = ['event', 'send_name', 'wishing',  'act_name', 'remark']
+        record = cls(
+            user=user,
+            re_openid=re_openid,
+            total_amount=total_amount,
+            total_num=total_num,
+            type=type,
+            reverse_key=reverse_key,
+            amt_type=amt_type,
+            client_ip=client_ip,
+        )
+        for attr in attrs:
+            setattr(record, attr, getattr(redpack_template, attr))
+        record.mch_id = settings.WEINXIN_PAY_MCH_ID
+        record.wxappid = settings.WEIXIN_APP_ID
+        record.mch_billno = create_mch_billno(settings.WEINXIN_PAY_MCH_ID)
+        record.save()
+        return record
+
+    @classmethod
+    def new_record(cls, user, re_openid, send_name,
+            total_amount, total_num, wishing, act_name, remark,
+            type='redpack', event='', reverse_key='',
+            client_ip='127.0.0.1', amt_type=''):
+        record = cls(
+            user=user,
+            send_name=send_name,
+            re_openid=re_openid,
+            total_amount=total_amount,
+            total_num=total_num,
+            wishing=wishing,
+            act_name=act_name,
+            remark=remark,
+            type=type,
+            event=event,
+            reverse_key=reverse_key,
+            client_ip=client_ip,
+            amt_type=amt_type
+        )
+        record.mch_id = settings.WEINXIN_PAY_MCH_ID
+        record.wxappid = settings.WEIXIN_APP_ID
+        record.mch_billno = create_mch_billno(settings.WEINXIN_PAY_MCH_ID)
+        record.save()
+        return record
+
+    def send_redpack(self):
+        '''如果红包发送成功，不重复调用接口'''
+        send = False
+        if self.status == 'SUCCESS':
+            return (None, send)
+        response = sendredpack(
+            re_openid=self.re_openid,
+            total_amount=self.total_amount,
+            total_num=self.total_num,
+            send_name=self.send_name,
+            mch_billno=self.mch_billno,
+            wishing=self.wishing,
+            act_name=self.act_name,
+            remark=self.remark,
+            client_ip=self.client_ip
+        )
+        self.response = response.content
+        if response.status_code < 200 or response.status_code > 299:
+            self.status = 'FAIL'
+        else:
+            rdict = xml_response_to_dict(response)
+            if rdict['return_code'] == 'SUCCESS' \
+                    and rdict['result_code'] == 'SUCCESS':
+                self.status = 'SUCCESS'
+                attrs = ['send_time', 'send_listid']
+                for attr in attrs:
+                    if attr in rdict:
+                        setattr(self, attr, rdict[attr])
+            else:
+                self.status = 'FAIL'
+        self.save()
+        send = True
+        return (response, send)
