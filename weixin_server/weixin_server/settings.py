@@ -168,7 +168,7 @@ WEIXIN_APP_SECRET = 'Your weixin app secret'
 WEIXIN_ENCODING_AES_KEY = 'Your weixin encoding aes key'
 WEIXIN_ENCRYPT_MODE = 'safe' # safe | compatible | normal
 
-WEIXIN_PAY_CERT_PATH = 'cert_folder_path' # 证书文件夹路径
+WEIXIN_PAY_CERT_FOLDER_PATH = 'cert_folder_path' # 证书文件夹路径
 # 四个证书具体路径
 WEIXIN_PAY_P12_CERT_PATH = 'apiclient_cert.p12_file_path'
 WEIXIN_PAY_CERT_PATH = 'apiclient_cert.pem_file_path'
