@@ -11,3 +11,4 @@ MySQL-python==1.2.5
 git+https://github.com/duoduo369/django-mako.git
 pytz==2016.3
 path.py==8.1.2
+xmltodict==0.10.2

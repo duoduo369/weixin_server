@@ -168,6 +168,15 @@ WEIXIN_APP_SECRET = 'Your weixin app secret'
 WEIXIN_ENCODING_AES_KEY = 'Your weixin encoding aes key'
 WEIXIN_ENCRYPT_MODE = 'safe' # safe | compatible | normal
 
+WEIXIN_PAY_CERT_PATH = 'cert_folder_path' # 证书文件夹路径
+# 四个证书具体路径
+WEIXIN_PAY_P12_CERT_PATH = 'apiclient_cert.p12_file_path'
+WEIXIN_PAY_CERT_PATH = 'apiclient_cert.pem_file_path'
+WEIXIN_PAY_CERT_KEY_PATH = 'apiclient_key.pem_file_path'
+WEIXIN_PAY_CA_CERT_PATH = 'rootca.pem_file_path'
+WEIXIN_PAY_API_KEY = '' # 微信商户平台api安全中设置的安全码
+WEINXIN_PAY_MCH_ID = '' # 微信商户平台id
+
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
